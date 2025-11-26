@@ -1,0 +1,26 @@
+<?php
+// Bloqueia o checkout se houver uma quantidade de vinhos verdes que não seja múltipla de 3.
+
+add_action('woocommerce_check_cart_items', 'verificar_quantidade_vinhos_verdes_multiplo_de_3');
+
+function verificar_quantidade_vinhos_verdes_multiplo_de_3() {
+    if (is_admin() && !defined('DOING_AJAX')) {
+        return;
+    }
+
+    $quantidade_vinhos_verdes = 0;
+
+    foreach (WC()->cart->get_cart() as $item) {
+        $produto = $item['data'];
+        if (has_term('vinhos-verdes', 'product_cat', $produto->get_id())) {
+            $quantidade_vinhos_verdes += $item['quantity'];
+        }
+    }
+
+    if ($quantidade_vinhos_verdes > 0 && $quantidade_vinhos_verdes % 3 !== 0) {
+        wc_add_notice(
+            sprintf('Por favor, selecione vinhos verdes em múltiplos de 3. Atualmente tem %d no carrinho.', $quantidade_vinhos_verdes),
+            'error'
+        );
+    }
+}
